@@ -1,5 +1,11 @@
 # local.ch Lead Scraper
 
+Durchsucht **local.ch** nach Schweizer Kleinbetrieben ohne Website — inklusive Adresse, Telefon und E-Mail. Ergebnisse als CSV exportierbar.
+
+![App Screenshot](image.png)
+
+---
+
 ## Installation
 
 ### Voraussetzungen
