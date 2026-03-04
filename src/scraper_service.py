@@ -7,7 +7,7 @@ from typing import Optional
 
 from deduplicator import Deduplicator
 from filter import categorize_leads
-from website_checker import WebsiteChecker
+from website_checker import WebsiteChecker, is_free_email_provider, check_domain_has_website, DIRECTORY_DOMAINS
 from scraper_localch import LocalChScraper
 from models import Business
 
@@ -116,6 +116,48 @@ class ScraperService:
                 scraper.close()
                 scraper = None
 
+            # --- Geografischer Filter (PLZ-basiert) ---
+            # local.ch gibt manchmal Betriebe weit ausserhalb zurück.
+            # Strategie: erste 2 Ziffern der PLZ des ersten Resultats als Referenz.
+            # Damit bleiben Nachbargemeinden (z.B. Baden für Wettingen) drin,
+            # weit entfernte Orte (Zürich für Wettingen) werden herausgefiltert.
+            import re as _re
+
+            def _extract_plz(address: str) -> Optional[str]:
+                m = _re.search(r'\b(\d{4})\b', address or "")
+                return m.group(1) if m else None
+
+            location_lower = job.location.lower()
+            ref_plz_prefix = None
+            for _b in all_businesses:
+                plz = _extract_plz(_b.address)
+                if plz:
+                    ref_plz_prefix = plz[:2]
+                    break
+
+            before_geo = len(all_businesses)
+            geo_filtered = []
+            for b in all_businesses:
+                addr_lower = (b.address or "").lower()
+                plz = _extract_plz(b.address)
+                if location_lower in addr_lower:
+                    geo_filtered.append(b)
+                elif ref_plz_prefix and plz and plz[:2] == ref_plz_prefix:
+                    geo_filtered.append(b)
+                else:
+                    logger.debug(
+                        f"Geografisch gefiltert: {b.name} | {b.address} "
+                        f"(PLZ {plz} ≠ Referenz {ref_plz_prefix}xx)"
+                    )
+            all_businesses = geo_filtered
+            removed = before_geo - len(all_businesses)
+            if removed:
+                logger.info(
+                    f"Geografischer Filter (Referenz PLZ {ref_plz_prefix}xx): "
+                    f"{removed} Betriebe entfernt"
+                )
+            job.total_found = len(all_businesses)
+
             # --- Phase 2: Kategorisierung ---
             filtering = self.config.get("filtering", {})
             candidates = categorize_leads(
@@ -124,16 +166,36 @@ class ScraperService:
                 social_domains=filtering.get("social_media_domains"),
             )
 
+            # --- Phase 2b: Custom-Domain-E-Mail → Website-Check (schnell, kein Browser) ---
+            # Wenn ein Betrieb eine E-Mail mit eigener Domain hat (z.B. info@firma.ch),
+            # hat er fast immer auch eine Website → per HTTP prüfen.
+            job.current_term = "E-Mail-Domain-Check..."
+            for biz in candidates:
+                if biz.lead_type != "Keine Website":
+                    continue
+                if not biz.email or "@" not in biz.email:
+                    continue
+                domain = biz.email.split("@")[-1].lower()
+                if is_free_email_provider(domain) or domain in DIRECTORY_DOMAINS:
+                    continue
+                # Eigene Domain → Website prüfen
+                found_url = check_domain_has_website(domain)
+                if found_url:
+                    biz.website = found_url
+                    biz.has_website = True
+                    biz.lead_type = "Website vorhanden"
+                    logger.info(f"  Website via E-Mail-Domain: {biz.name} → {found_url}")
+
             no_website_candidates = [b for b in candidates if b.lead_type == "Keine Website"]
             has_website_candidates = [b for b in candidates if b.lead_type == "Website vorhanden"]
 
             logger.info(
-                f"Job {job.job_id}: {len(all_businesses)} gefunden, "
+                f"Job {job.job_id}: {len(all_businesses)} gefunden (nach Geo-Filter), "
                 f"{len(no_website_candidates)} ohne Website, "
-                f"{len(has_website_candidates)} mit Website → Verifizierung"
+                f"{len(has_website_candidates)} mit Website → Google-Verifizierung"
             )
 
-            # --- Phase 3: Google-Verifizierung (nur für "Keine Website") ---
+            # --- Phase 3: Google-Verifizierung (nur für verbleibende "Keine Website") ---
             job.status = "verifying"
             job.current_term = "Google-Verifizierung..."
             job.verify_total = len(no_website_candidates)
@@ -145,11 +207,10 @@ class ScraperService:
                 try:
                     found_url = checker.has_website(biz, job.location)
                     if found_url:
-                        # Google hat eine Website gefunden → umkategorisieren
                         biz.website = found_url
                         biz.has_website = True
                         biz.lead_type = "Website vorhanden"
-                        logger.info(f"  Website gefunden: {biz.name} → {found_url}")
+                        logger.info(f"  Website gefunden (Google): {biz.name} → {found_url}")
 
                     # Falls noch keine E-Mail, via Google suchen
                     if not biz.email:

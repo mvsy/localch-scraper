@@ -22,6 +22,63 @@ IGNORED_EMAIL_DOMAINS = {
     "placeholder.com", "email.com", "domain.com",
 }
 
+# Kostenlose / ISP E-Mail-Provider → kein Hinweis auf eigene Website
+FREE_EMAIL_PROVIDERS = {
+    # Webmail international
+    "gmail.com", "googlemail.com",
+    "yahoo.com", "yahoo.de", "yahoo.ch", "yahoo.fr",
+    "hotmail.com", "hotmail.ch", "hotmail.de",
+    "outlook.com", "outlook.ch", "outlook.de",
+    "live.com", "live.ch", "live.de",
+    "msn.com", "icloud.com", "me.com", "mac.com",
+    "aol.com", "aol.de",
+    # Schweizer ISPs
+    "bluewin.ch", "bluemail.ch",
+    "sunrise.ch", "sunrisemail.ch",
+    "hispeed.ch", "tele2.ch",
+    "swisscom.ch", "swisscom.net",
+    "quickline.ch", "vtxnet.ch",
+    # Deutsche ISPs / Webmail
+    "gmx.ch", "gmx.net", "gmx.de", "gmx.at", "gmx.com",
+    "web.de", "freenet.de", "t-online.de", "arcor.de",
+    "1und1.de", "versatel.de",
+    # Datenschutz-Webmail
+    "protonmail.com", "protonmail.ch", "pm.me",
+    "tutanota.com", "tutanota.de",
+    "mailbox.org", "posteo.de", "posteo.ch",
+}
+
+
+def is_free_email_provider(domain: str) -> bool:
+    """Prüft ob eine E-Mail-Domain ein kostenloser/ISP-Anbieter ist."""
+    return domain.lower() in FREE_EMAIL_PROVIDERS
+
+
+def check_domain_has_website(domain: str) -> Optional[str]:
+    """Prüft per HTTP-Request ob eine Domain eine Website hat.
+
+    Viel schneller als Playwright — kein Browser nötig.
+    Returns die finale URL wenn erreichbar, sonst None.
+    """
+    import httpx
+    for scheme in ("https", "http"):
+        url = f"{scheme}://{domain}"
+        try:
+            resp = httpx.get(
+                url,
+                timeout=6,
+                follow_redirects=True,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0.0.0"},
+            )
+            if resp.status_code < 400:
+                final = str(resp.url)
+                # Sicherstellen dass es nicht zu local.ch oder ähnlichem umgeleitet wurde
+                if "local.ch" not in final and "google." not in final:
+                    return final
+        except Exception:
+            continue
+    return None
+
 # Domains die NICHT als echte Website zählen (Verzeichnisse, Social Media, etc.)
 DIRECTORY_DOMAINS = {
     "facebook.com", "instagram.com", "twitter.com", "x.com",
