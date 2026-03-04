@@ -4,7 +4,7 @@ import io
 import logging
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 from pydantic import BaseModel
 
 # src/ als Modul-Pfad
@@ -208,6 +208,14 @@ def download_csv(job_id: str):
 
 
 # --- Frontend ---
+
+@app.get("/background.jpg")
+def serve_background():
+    bg_path = os.path.join(os.path.dirname(__file__), "..", "background.jpg")
+    if not os.path.exists(bg_path):
+        raise HTTPException(status_code=404, detail="Background image not found")
+    return FileResponse(bg_path, media_type="image/jpeg")
+
 
 @app.get("/", response_class=HTMLResponse)
 def index():

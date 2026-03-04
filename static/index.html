@@ -1,201 +1,804 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>local.ch Scraper</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>local.ch Lead Scraper</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%231e40af'/><circle cx='50' cy='50' r='34' fill='none' stroke='white' stroke-width='6'/><circle cx='50' cy='50' r='18' fill='none' stroke='white' stroke-width='6'/><circle cx='50' cy='50' r='6' fill='white'/><line x1='50' y1='2' x2='50' y2='20' stroke='white' stroke-width='5' stroke-linecap='round'/><line x1='50' y1='80' x2='50' y2='98' stroke='white' stroke-width='5' stroke-linecap='round'/><line x1='2' y1='50' x2='20' y2='50' stroke='white' stroke-width='5' stroke-linecap='round'/><line x1='80' y1='50' x2='98' y2='50' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>">
     <style>
-        .fade-in { animation: fadeIn 0.3s ease-in; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ── Dark Theme (Default) ── */
+        :root {
+            --accent:           #1e40af;
+            --accent-2:         #2563eb;
+
+            --overlay:          linear-gradient(135deg, rgba(5,5,20,0.78) 0%, rgba(10,10,30,0.82) 100%);
+            --body-bg:          #0a0a1a;
+            --body-color:       white;
+
+            --glass-bg:         rgba(255,255,255,0.07);
+            --glass-border:     rgba(255,255,255,0.13);
+            --glass-sm-bg:      rgba(255,255,255,0.06);
+            --glass-sm-border:  rgba(255,255,255,0.11);
+
+            --lbl-color:        rgba(255,255,255,0.5);
+            --sub-color:        rgba(255,255,255,0.38);
+            --dim-color:        rgba(255,255,255,0.2);
+            --muted-color:      rgba(255,255,255,0.35);
+
+            --input-bg:         rgba(255,255,255,0.09);
+            --input-border:     rgba(255,255,255,0.2);
+            --input-color:      white;
+            --input-ph:         rgba(255,255,255,0.3);
+            --input-focus-bg:   rgba(255,255,255,0.13);
+
+            --cat-bg:           rgba(255,255,255,0.05);
+            --cat-border:       rgba(255,255,255,0.1);
+            --cat-hover-bg:     rgba(255,255,255,0.09);
+            --cat-hover-brd:    rgba(255,255,255,0.2);
+            --cat-name:         rgba(255,255,255,0.82);
+            --cat-count:        rgba(255,255,255,0.28);
+            --cat-act:          rgba(255,255,255,0.45);
+
+            --stat-bg:          rgba(255,255,255,0.05);
+            --stat-border:      rgba(255,255,255,0.09);
+            --stat-lbl:         rgba(255,255,255,0.42);
+
+            --th-bg:            rgba(0,0,0,0.25);
+            --th-color:         rgba(255,255,255,0.45);
+            --tr-border:        rgba(255,255,255,0.05);
+            --tr-hover:         rgba(255,255,255,0.04);
+            --td-color:         rgba(255,255,255,0.8);
+            --td-addr:          rgba(255,255,255,0.55);
+            --td-phone:         rgba(255,255,255,0.65);
+            --td-rating:        rgba(255,255,255,0.55);
+
+            --pg-border:        rgba(255,255,255,0.07);
+            --pg-info:          rgba(255,255,255,0.35);
+            --pg-btn-bg:        rgba(255,255,255,0.08);
+            --pg-btn-color:     rgba(255,255,255,0.75);
+            --pg-btn-border:    rgba(255,255,255,0.14);
+            --pg-btn-hover:     rgba(255,255,255,0.14);
+
+            --res-border:       rgba(255,255,255,0.08);
+            --badge-cat-bg:     rgba(255,255,255,0.08);
+            --badge-cat-clr:    rgba(255,255,255,0.6);
+
+            --link-color:       #60a5fa;
+            --name-color:       rgba(255,255,255,0.92);
+            --logo-name:        rgba(255,255,255,0.92);
+            --logo-sub:         rgba(255,255,255,0.38);
+            --logo-tag:         rgba(255,255,255,0.38);
+            --google-btn:       rgba(255,255,255,0.28);
+
+            --resume-bg:        rgba(30,64,175,0.15);
+            --resume-border:    rgba(30,64,175,0.35);
+            --resume-color:     #93c5fd;
+
+            --progress-track:   rgba(255,255,255,0.1);
+            --term-color:       rgba(255,255,255,0.35);
+            --prog-loc:         rgba(255,255,255,0.45);
+            --time-color:       rgba(255,255,255,0.38);
+
+            --scroll-thumb:     rgba(255,255,255,0.18);
+            --scroll-hover:     rgba(255,255,255,0.3);
+
+            --toggle-bg:        rgba(255,255,255,0.08);
+            --toggle-border:    rgba(255,255,255,0.14);
+            --toggle-color:     rgba(255,255,255,0.65);
+        }
+
+        /* ── Light Theme ── */
+        [data-theme="light"] {
+            --overlay:          linear-gradient(135deg, rgba(215,230,255,0.84) 0%, rgba(230,240,255,0.88) 100%);
+            --body-bg:          #dce8f7;
+            --body-color:       #1a202c;
+
+            --glass-bg:         rgba(255,255,255,0.88);
+            --glass-border:     rgba(30,64,175,0.1);
+            --glass-sm-bg:      rgba(255,255,255,0.82);
+            --glass-sm-border:  rgba(30,64,175,0.08);
+
+            --lbl-color:        #64748b;
+            --sub-color:        #64748b;
+            --dim-color:        #cbd5e1;
+            --muted-color:      #6b7280;
+
+            --input-bg:         rgba(0,0,0,0.04);
+            --input-border:     rgba(0,0,0,0.15);
+            --input-color:      #1a202c;
+            --input-ph:         rgba(0,0,0,0.35);
+            --input-focus-bg:   rgba(30,64,175,0.04);
+
+            --cat-bg:           rgba(0,0,0,0.03);
+            --cat-border:       rgba(0,0,0,0.08);
+            --cat-hover-bg:     rgba(30,64,175,0.06);
+            --cat-hover-brd:    rgba(30,64,175,0.18);
+            --cat-name:         #1a202c;
+            --cat-count:        #94a3b8;
+            --cat-act:          #64748b;
+
+            --stat-bg:          rgba(0,0,0,0.04);
+            --stat-border:      rgba(0,0,0,0.07);
+            --stat-lbl:         #64748b;
+
+            --th-bg:            rgba(0,0,0,0.04);
+            --th-color:         #64748b;
+            --tr-border:        rgba(0,0,0,0.05);
+            --tr-hover:         rgba(30,64,175,0.04);
+            --td-color:         #374151;
+            --td-addr:          #6b7280;
+            --td-phone:         #4b5563;
+            --td-rating:        #6b7280;
+
+            --pg-border:        rgba(0,0,0,0.07);
+            --pg-info:          #6b7280;
+            --pg-btn-bg:        rgba(0,0,0,0.05);
+            --pg-btn-color:     #374151;
+            --pg-btn-border:    rgba(0,0,0,0.1);
+            --pg-btn-hover:     rgba(0,0,0,0.09);
+
+            --res-border:       rgba(0,0,0,0.07);
+            --badge-cat-bg:     rgba(30,64,175,0.08);
+            --badge-cat-clr:    #1e40af;
+
+            --link-color:       #1d4ed8;
+            --name-color:       #1a202c;
+            --logo-name:        #1a202c;
+            --logo-sub:         #64748b;
+            --logo-tag:         #64748b;
+            --google-btn:       rgba(0,0,0,0.28);
+
+            --resume-bg:        rgba(30,64,175,0.1);
+            --resume-border:    rgba(30,64,175,0.25);
+            --resume-color:     #1e40af;
+
+            --progress-track:   rgba(0,0,0,0.08);
+            --term-color:       #94a3b8;
+            --prog-loc:         #64748b;
+            --time-color:       #94a3b8;
+
+            --scroll-thumb:     rgba(0,0,0,0.18);
+            --scroll-hover:     rgba(0,0,0,0.3);
+
+            --toggle-bg:        rgba(0,0,0,0.06);
+            --toggle-border:    rgba(0,0,0,0.12);
+            --toggle-color:     #374151;
+        }
+
+        /* ── Auto: Light wenn System = Hell ── */
+        @media (prefers-color-scheme: light) {
+            [data-theme="auto"] {
+                --overlay:          linear-gradient(135deg, rgba(215,230,255,0.84) 0%, rgba(230,240,255,0.88) 100%);
+                --body-bg:          #dce8f7;
+                --body-color:       #1a202c;
+
+                --glass-bg:         rgba(255,255,255,0.88);
+                --glass-border:     rgba(30,64,175,0.1);
+                --glass-sm-bg:      rgba(255,255,255,0.82);
+                --glass-sm-border:  rgba(30,64,175,0.08);
+
+                --lbl-color:        #64748b;
+                --sub-color:        #64748b;
+                --dim-color:        #cbd5e1;
+                --muted-color:      #6b7280;
+
+                --input-bg:         rgba(0,0,0,0.04);
+                --input-border:     rgba(0,0,0,0.15);
+                --input-color:      #1a202c;
+                --input-ph:         rgba(0,0,0,0.35);
+                --input-focus-bg:   rgba(30,64,175,0.04);
+
+                --cat-bg:           rgba(0,0,0,0.03);
+                --cat-border:       rgba(0,0,0,0.08);
+                --cat-hover-bg:     rgba(30,64,175,0.06);
+                --cat-hover-brd:    rgba(30,64,175,0.18);
+                --cat-name:         #1a202c;
+                --cat-count:        #94a3b8;
+                --cat-act:          #64748b;
+
+                --stat-bg:          rgba(0,0,0,0.04);
+                --stat-border:      rgba(0,0,0,0.07);
+                --stat-lbl:         #64748b;
+
+                --th-bg:            rgba(0,0,0,0.04);
+                --th-color:         #64748b;
+                --tr-border:        rgba(0,0,0,0.05);
+                --tr-hover:         rgba(30,64,175,0.04);
+                --td-color:         #374151;
+                --td-addr:          #6b7280;
+                --td-phone:         #4b5563;
+                --td-rating:        #6b7280;
+
+                --pg-border:        rgba(0,0,0,0.07);
+                --pg-info:          #6b7280;
+                --pg-btn-bg:        rgba(0,0,0,0.05);
+                --pg-btn-color:     #374151;
+                --pg-btn-border:    rgba(0,0,0,0.1);
+                --pg-btn-hover:     rgba(0,0,0,0.09);
+
+                --res-border:       rgba(0,0,0,0.07);
+                --badge-cat-bg:     rgba(30,64,175,0.08);
+                --badge-cat-clr:    #1e40af;
+
+                --link-color:       #1d4ed8;
+                --name-color:       #1a202c;
+                --logo-name:        #1a202c;
+                --logo-sub:         #64748b;
+                --logo-tag:         #64748b;
+                --google-btn:       rgba(0,0,0,0.28);
+
+                --resume-bg:        rgba(30,64,175,0.1);
+                --resume-border:    rgba(30,64,175,0.25);
+                --resume-color:     #1e40af;
+
+                --progress-track:   rgba(0,0,0,0.08);
+                --term-color:       #94a3b8;
+                --prog-loc:         #64748b;
+                --time-color:       #94a3b8;
+
+                --scroll-thumb:     rgba(0,0,0,0.18);
+                --scroll-hover:     rgba(0,0,0,0.3);
+
+                --toggle-bg:        rgba(0,0,0,0.06);
+                --toggle-border:    rgba(0,0,0,0.12);
+                --toggle-color:     #374151;
+            }
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--body-bg);
+            background-image: url('/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--body-color);
+            transition: color 0.2s;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay);
+            z-index: 0;
+            pointer-events: none;
+            transition: background 0.25s;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 20px 60px;
+        }
+
+        /* ── Glassmorphism ── */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            transition: background 0.25s, border-color 0.25s;
+        }
+
+        .glass-sm {
+            background: var(--glass-sm-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--glass-sm-border);
+            border-radius: 10px;
+            transition: background 0.25s, border-color 0.25s;
+        }
+
+        /* ── Header ── */
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; margin-bottom: 20px; }
+
+        .logo-wrap { display: flex; align-items: center; gap: 14px; }
+        .logo-mark {
+            width: 46px; height: 46px; border-radius: 12px;
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .logo-text { font-size: 22px; font-weight: 800; line-height: 1.1; }
+        .logo-text .blue { color: #3b82f6; }
+        .logo-text .name { color: var(--logo-name); }
+        .logo-sub { font-size: 12px; color: var(--logo-sub); margin-top: 3px; letter-spacing: 0.04em; }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        #resumeNotice {
+            display: none;
+            background: var(--resume-bg);
+            border: 1px solid var(--resume-border);
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-size: 13px;
+            color: var(--resume-color);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            border-radius: 8px;
+            color: var(--toggle-color);
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: var(--pg-btn-hover); }
+        .theme-toggle svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+        /* ── Form ── */
+        .form-card { padding: 24px; margin-bottom: 20px; }
+
+        label.field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--lbl-color);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--input-color);
+            border-radius: 10px;
+            padding: 13px 16px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        input[type="text"]::placeholder { color: var(--input-ph); }
+        input[type="text"]:focus {
+            border-color: var(--accent-2);
+            background: var(--input-focus-bg);
+        }
+
+        .cat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .cat-actions { display: flex; gap: 12px; }
+        .cat-actions button {
+            font-size: 12px; color: var(--cat-act);
+            background: none; border: none; cursor: pointer;
+            transition: color 0.15s;
+        }
+        .cat-actions button:first-child { color: var(--accent-2); }
+        .cat-actions button:hover { color: var(--body-color); }
+
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 8px; }
+
+        .cat-item {
+            background: var(--cat-bg);
+            border: 1px solid var(--cat-border);
+            border-radius: 9px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .cat-item:hover { background: var(--cat-hover-bg); border-color: var(--cat-hover-brd); }
+        .cat-item label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .cat-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+        .cat-item .cat-name { font-size: 13px; font-weight: 500; color: var(--cat-name); }
+        .cat-item .cat-count { font-size: 11px; color: var(--cat-count); margin-left: auto; }
+
+        .btn-start {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 11px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn-start:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-start:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        /* ── Progress ── */
+        .progress-card { padding: 24px; margin-bottom: 20px; }
+
+        .progress-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+        .progress-title { font-size: 18px; font-weight: 700; }
+        .progress-loc { font-size: 13px; color: var(--prog-loc); margin-top: 3px; }
+
+        .status-badge {
+            display: inline-flex; align-items: center;
+            padding: 4px 13px; border-radius: 999px;
+            font-size: 12px; font-weight: 600;
+        }
+        .s-running  { background: rgba(234,179,8,0.18); color: #fde68a; border: 1px solid rgba(234,179,8,0.3); }
+        .s-verify   { background: rgba(139,92,246,0.18); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }
+        .s-done     { background: rgba(34,197,94,0.18); color: #86efac; border: 1px solid rgba(34,197,94,0.3); }
+        .s-error    { background: rgba(239,68,68,0.18); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+
+        .pct-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+        .pct-num { font-size: 28px; font-weight: 800; }
+        .time-est { font-size: 13px; color: var(--time-color); }
+
+        .progress-track { height: 10px; background: var(--progress-track); border-radius: 999px; overflow: hidden; }
+        .progress-fill {
+            height: 100%; border-radius: 999px;
+            transition: width 0.5s ease, background 0.5s ease;
+            background: linear-gradient(90deg, #1e40af, #3b82f6);
+        }
+        .progress-fill.verifying { background: linear-gradient(90deg, #7C3AED, #A855F7); }
+        .progress-fill.done      { background: linear-gradient(90deg, #16a34a, #22c55e); }
+
+        .current-term { font-size: 12px; color: var(--term-color); margin-top: 7px; min-height: 18px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 18px; }
+        .stat-box {
+            background: var(--stat-bg);
+            border: 1px solid var(--stat-border);
+            border-radius: 10px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+        .stat-num { font-size: 26px; font-weight: 800; line-height: 1; }
+        .stat-lbl { font-size: 11px; color: var(--stat-lbl); margin-top: 4px; }
+        .stat-primary { color: var(--body-color); }
+
+        /* ── Results ── */
+        .results-card { overflow: hidden; }
+        .results-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--res-border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .results-title { font-size: 16px; font-weight: 700; }
+        .results-sub { font-size: 13px; color: var(--sub-color); margin-top: 2px; }
+
+        .btn-download {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white; border: none; border-radius: 8px;
+            padding: 9px 20px; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+        .btn-download:hover { opacity: 0.9; }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: var(--th-bg); }
+        thead th {
+            color: var(--th-color); font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            padding: 11px 16px; text-align: left; white-space: nowrap;
+        }
+        tbody tr { border-top: 1px solid var(--tr-border); transition: background 0.12s; }
+        tbody tr:hover { background: var(--tr-hover); }
+        tbody td { padding: 11px 16px; font-size: 13px; color: var(--td-color); vertical-align: middle; }
+        .td-addr  { color: var(--td-addr) !important; font-size: 12px; }
+        .td-phone { white-space: nowrap; color: var(--td-phone) !important; }
+        .td-rating-val { color: var(--td-rating); }
+
+        .badge-hot {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(34,197,94,0.15); color: #86efac;
+            border: 1px solid rgba(34,197,94,0.28); border-radius: 999px;
+            padding: 3px 10px; font-size: 11px; font-weight: 600; white-space: nowrap;
+        }
+        .badge-cold {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(249,115,22,0.15); color: #fdba74;
+            border: 1px solid rgba(249,115,22,0.28); border-radius: 999px;
+            padding: 3px 10px; font-size: 11px; font-weight: 600; white-space: nowrap;
+        }
+        .badge-cat {
+            background: var(--badge-cat-bg); color: var(--badge-cat-clr);
+            border-radius: 6px; padding: 2px 8px; font-size: 11px; white-space: nowrap;
+        }
+
+        .name-cell { display: flex; align-items: center; gap: 2px; }
+        .name-text { font-weight: 600; color: var(--name-color); }
+        .google-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+            color: var(--google-btn); text-decoration: none;
+            transition: color 0.15s, background 0.15s;
+        }
+        .google-btn:hover { color: #4285F4; background: rgba(66,133,244,0.12); }
+
+        .link-blue { color: var(--link-color); text-decoration: none; font-size: 12px; }
+        .link-blue:hover { text-decoration: underline; }
+        .dim { color: var(--dim-color); }
+
+        .pagination {
+            padding: 13px 22px;
+            border-top: 1px solid var(--pg-border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .page-info { font-size: 13px; color: var(--pg-info); }
+        .btn-page {
+            background: var(--pg-btn-bg); color: var(--pg-btn-color);
+            border: 1px solid var(--pg-btn-border); border-radius: 7px;
+            padding: 7px 14px; font-size: 13px; cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-page:hover:not(:disabled) { background: var(--pg-btn-hover); }
+        .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* ── Animations ── */
+        .fade-in { animation: fadeIn 0.35s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hidden { display: none !important; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scroll-hover); }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-5xl mx-auto px-4 py-8">
+<body>
+    <div class="overlay"></div>
+
+    <div class="content">
 
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">local.ch Scraper</h1>
-            <p class="text-gray-500 mt-1">Finde lokale Businesses und kategorisiere Leads (Quelle: local.ch)</p>
+        <div class="glass header">
+            <div class="logo-wrap">
+                <div class="logo-mark">
+                    <svg viewBox="0 0 36 36" width="26" height="26" fill="white">
+                        <path d="M18 3C9.72 3 3 9.72 3 18s6.72 15 15 15 15-6.72 15-15S26.28 3 18 3zm0 3c6.63 0 12 5.37 12 12s-5.37 12-12 12S6 24.63 6 18 11.37 6 18 6zm0 4a8 8 0 100 16A8 8 0 0018 10zm0 3a5 5 0 110 10A5 5 0 0118 13zm0 3a2 2 0 100 4 2 2 0 000-4z"/>
+                        <line x1="18" y1="3" x2="18" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <line x1="18" y1="27" x2="18" y2="33" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <line x1="3" y1="18" x2="9" y2="18" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <line x1="27" y1="18" x2="33" y2="18" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="logo-text">
+                        <span class="blue">local</span><span class="name">.ch</span>
+                        <span style="font-size: 13px; font-weight: 400; color: var(--logo-tag); margin-left: 10px;">Lead Scraper</span>
+                    </div>
+                    <div class="logo-sub">Schweizer KMU Lead Generator</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div id="resumeNotice">↩ Vorheriger Job wird fortgesetzt...</div>
+                <button class="theme-toggle" id="themeToggle" onclick="cycleTheme()" title="Theme wechseln">
+                    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+                    <span id="themeLabel">Auto</span>
+                </button>
+            </div>
         </div>
 
         <!-- Search Form -->
-        <div id="searchForm" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Ort</label>
-                <input type="text" id="location" placeholder="z.B. Uster, Winterthur, Zürich..."
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+        <div class="glass form-card" id="searchForm">
+            <div style="margin-bottom: 18px;">
+                <label class="field-label">Ort</label>
+                <input type="text" id="location" placeholder="z.B. Uster, Winterthur, Zürich, Wettingen...">
             </div>
 
-            <!-- Categories -->
-            <div class="mb-4">
-                <div class="flex items-center justify-between mb-2">
-                    <label class="block text-sm font-medium text-gray-700">Kategorien</label>
-                    <div class="space-x-2">
-                        <button onclick="selectAll(true)" class="text-xs text-blue-600 hover:underline">Alle</button>
-                        <button onclick="selectAll(false)" class="text-xs text-blue-600 hover:underline">Keine</button>
+            <div>
+                <div class="cat-header">
+                    <label class="field-label" style="margin-bottom: 0;">Kategorien</label>
+                    <div class="cat-actions">
+                        <button onclick="selectAll(true)">Alle wählen</button>
+                        <button onclick="selectAll(false)">Keine</button>
                     </div>
                 </div>
-                <div id="categories" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                </div>
+                <div id="categories" class="cat-grid"></div>
             </div>
 
-            <button onclick="startScrape()" id="startBtn"
-                class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                Suche starten
-            </button>
+            <button class="btn-start" id="startBtn" onclick="startScrape()">Suche starten</button>
         </div>
 
         <!-- Progress -->
-        <div id="progressSection" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 fade-in">
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="text-lg font-semibold text-gray-900">Fortschritt</h2>
-                <span id="statusBadge" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    Läuft...
-                </span>
+        <div class="glass progress-card fade-in hidden" id="progressSection">
+            <div class="progress-header">
+                <div>
+                    <div class="progress-title">Fortschritt</div>
+                    <div class="progress-loc" id="progressLocation"></div>
+                </div>
+                <span class="status-badge s-running" id="statusBadge">Läuft...</span>
             </div>
-            <div class="mb-3">
-                <div class="flex justify-between text-sm text-gray-600 mb-1">
-                    <span id="progressLocation"></span>
-                    <span id="progressPct">0%</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-3">
-                    <div id="progressBar" class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
-                </div>
+
+            <div class="pct-row">
+                <span class="pct-num" id="progressPct">0%</span>
+                <span class="time-est" id="timeEstimate"></span>
             </div>
-            <div class="grid grid-cols-5 gap-4 text-center">
-                <div>
-                    <div id="statFound" class="text-2xl font-bold text-gray-900">0</div>
-                    <div class="text-xs text-gray-500">Gefunden</div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressBar" style="width:0%"></div>
+            </div>
+            <div class="current-term" id="currentTerm"></div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-num stat-primary" id="statFound">0</div>
+                    <div class="stat-lbl">Gefunden</div>
                 </div>
-                <div>
-                    <div id="statNoWeb" class="text-2xl font-bold text-green-600">0</div>
-                    <div class="text-xs text-gray-500">Ohne Website</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statNoWeb" style="color:#86efac;">0</div>
+                    <div class="stat-lbl">Ohne Website</div>
                 </div>
-                <div>
-                    <div id="statHasWeb" class="text-2xl font-bold text-orange-500">0</div>
-                    <div class="text-xs text-gray-500">Mit Website</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statHasWeb" style="color:#fdba74;">0</div>
+                    <div class="stat-lbl">Mit Website</div>
                 </div>
-                <div>
-                    <div id="statEmails" class="text-2xl font-bold text-blue-600">0</div>
-                    <div class="text-xs text-gray-500">Emails gefunden</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statEmails" style="color:#93c5fd;">0</div>
+                    <div class="stat-lbl">Emails</div>
                 </div>
-                <div>
-                    <div id="statTerm" class="text-sm font-medium text-gray-700 truncate">-</div>
-                    <div class="text-xs text-gray-500">Aktueller Begriff</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statVerify" style="color:#c4b5fd;">—</div>
+                    <div class="stat-lbl">Verifiziert</div>
                 </div>
             </div>
         </div>
 
         <!-- Results -->
-        <div id="resultsSection" class="hidden fade-in">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900">
-                        Ergebnisse: <span id="resultCount">0</span> Leads
-                    </h2>
-                    <button onclick="downloadCSV()" id="downloadBtn"
-                        class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
-                        CSV Download
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="text-left px-4 py-3 font-medium text-gray-600">Lead-Typ</th>
-                                <th class="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                                <th class="text-left px-4 py-3 font-medium text-gray-600">Adresse</th>
-                                <th class="text-left px-4 py-3 font-medium text-gray-600">Telefon</th>
-                                <th class="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-                                <th class="text-left px-4 py-3 font-medium text-gray-600">Website</th>
-                                <th class="text-left px-4 py-3 font-medium text-gray-600">Kategorie</th>
-                                <th class="text-left px-4 py-3 font-medium text-gray-600">Rating</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultsBody" class="divide-y divide-gray-100">
-                        </tbody>
-                    </table>
-                </div>
-                <div id="pagination" class="p-4 border-t border-gray-200 flex items-center justify-between">
-                    <span id="pageInfo" class="text-sm text-gray-500"></span>
-                    <div class="space-x-2">
-                        <button onclick="prevPage()" id="prevBtn" class="px-3 py-1.5 border rounded text-sm disabled:opacity-50" disabled>Zurück</button>
-                        <button onclick="nextPage()" id="nextBtn" class="px-3 py-1.5 border rounded text-sm disabled:opacity-50" disabled>Weiter</button>
+        <div class="glass results-card fade-in hidden" id="resultsSection">
+            <div class="results-header">
+                <div>
+                    <div class="results-title"><span id="resultCount">0</span> Leads gefunden</div>
+                    <div class="results-sub">
+                        <span style="color:#86efac;" id="summaryNoWeb">0</span> ohne Website ·
+                        <span style="color:#fdba74;" id="summaryHasWeb">0</span> mit Website ·
+                        <span style="color:#93c5fd;" id="summaryEmails">0</span> mit Email
                     </div>
+                </div>
+                <button class="btn-download" onclick="downloadCSV()">↓ CSV Download</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Name</th>
+                            <th>Adresse</th>
+                            <th>Telefon</th>
+                            <th>Email</th>
+                            <th>Website</th>
+                            <th>Kategorie</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <span class="page-info" id="pageInfo"></span>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-page" id="prevBtn" onclick="prevPage()" disabled>← Zurück</button>
+                    <button class="btn-page" id="nextBtn" onclick="nextPage()" disabled>Weiter →</button>
                 </div>
             </div>
         </div>
-    </div>
+
+    </div><!-- /content -->
 
     <script>
-        let currentJobId = null;
-        let pollInterval = null;
-        let allResults = [];
-        let currentPage = 0;
-        const PAGE_SIZE = 25;
+        // ── Theme System ─────────────────────────────────────────────────
+        const THEME_CYCLE = ['auto', 'light', 'dark'];
 
-        // Kategorien laden
+        const THEME_ICONS = {
+            auto:  '<circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+            light: '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+            dark:  '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+        };
+        const THEME_LABELS = { auto: 'Auto', light: 'Hell', dark: 'Dunkel' };
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.getElementById('themeIcon').innerHTML = THEME_ICONS[theme];
+            document.getElementById('themeLabel').textContent = THEME_LABELS[theme];
+        }
+
+        function cycleTheme() {
+            const cur  = document.documentElement.getAttribute('data-theme') || 'auto';
+            const next = THEME_CYCLE[(THEME_CYCLE.indexOf(cur) + 1) % THEME_CYCLE.length];
+            setTheme(next);
+        }
+
+        // Init theme immediately (before render)
+        setTheme(localStorage.getItem('theme') || 'auto');
+
+        // ── App State ────────────────────────────────────────────────────
+        let currentJobId   = null;
+        let pollInterval   = null;
+        let allResults     = [];
+        let currentPage    = 0;
+        let currentLocation = '';
+        const PAGE_SIZE    = 25;
+
+        // ── Zeit-Schätzung ──────────────────────────────────────────────
+        function formatTimeRemaining(startMs, pct) {
+            if (pct < 3) return '';
+            const elapsed   = Date.now() - startMs;
+            const total     = elapsed / (pct / 100);
+            const remaining = total - elapsed;
+            if (remaining <= 0) return 'Gleich fertig…';
+            const mins = Math.ceil(remaining / 60000);
+            return mins <= 1 ? 'ca. 1 Minute' : `ca. ${mins} Minuten`;
+        }
+
+        // ── localStorage ────────────────────────────────────────────────
+        function saveJob(jobId, location) {
+            localStorage.setItem('activeJobId',       jobId);
+            localStorage.setItem('activeJobLocation', location);
+            localStorage.setItem('jobStartTime',      Date.now().toString());
+        }
+        function clearSavedJob() {
+            localStorage.removeItem('activeJobId');
+            localStorage.removeItem('activeJobLocation');
+            localStorage.removeItem('jobStartTime');
+        }
+
+        // ── Kategorien laden ─────────────────────────────────────────────
         async function loadCategories() {
-            const resp = await fetch('/api/categories');
+            const resp   = await fetch('/api/categories');
             const groups = await resp.json();
-            const container = document.getElementById('categories');
+            const cont   = document.getElementById('categories');
 
             for (const [group, terms] of Object.entries(groups)) {
                 const div = document.createElement('div');
-                div.className = 'border border-gray-200 rounded-lg p-3';
+                div.className = 'cat-item';
                 div.innerHTML = `
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked data-group="${group}"
-                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm font-medium text-gray-800">${group}</span>
-                        <span class="text-xs text-gray-400">(${terms.length})</span>
-                    </label>
-                `;
-                container.appendChild(div);
+                  <label>
+                    <input type="checkbox" checked data-group="${group}">
+                    <span class="cat-name">${group}</span>
+                    <span class="cat-count">${terms.length}</span>
+                  </label>`;
+                cont.appendChild(div);
             }
-
-            window._categoryGroups = groups;
+            window._catGroups = groups;
         }
 
-        function selectAll(checked) {
-            document.querySelectorAll('#categories input[type="checkbox"]').forEach(cb => cb.checked = checked);
+        function selectAll(v) {
+            document.querySelectorAll('#categories input[type="checkbox"]').forEach(c => c.checked = v);
         }
 
-        function getSelectedCategories() {
-            const selected = [];
-            document.querySelectorAll('#categories input[type="checkbox"]:checked').forEach(cb => {
-                const group = cb.dataset.group;
-                if (window._categoryGroups[group]) {
-                    selected.push(...window._categoryGroups[group]);
-                }
+        function getSelected() {
+            const sel = [];
+            document.querySelectorAll('#categories input[type="checkbox"]:checked').forEach(c => {
+                const g = c.dataset.group;
+                if (window._catGroups[g]) sel.push(...window._catGroups[g]);
             });
-            return selected;
+            return sel;
         }
 
-        // Suche starten
+        // ── Suche starten ───────────────────────────────────────────────
         async function startScrape() {
-            const location = document.getElementById('location').value.trim();
-            if (!location) {
-                alert('Bitte einen Ort eingeben');
-                return;
-            }
+            const loc = document.getElementById('location').value.trim();
+            if (!loc) { alert('Bitte einen Ort eingeben'); return; }
 
-            const categories = getSelectedCategories();
-            if (categories.length === 0) {
-                alert('Bitte mindestens eine Kategorie wählen');
-                return;
-            }
+            const cats = getSelected();
+            if (!cats.length) { alert('Bitte mindestens eine Kategorie wählen'); return; }
 
             const btn = document.getElementById('startBtn');
             btn.disabled = true;
-            btn.textContent = 'Starte...';
+            btn.textContent = 'Starte…';
 
             try {
                 const resp = await fetch('/api/scrape', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ location, categories }),
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ location: loc, categories: cats }),
                 });
 
                 if (!resp.ok) {
@@ -207,22 +810,12 @@
                 }
 
                 const data = await resp.json();
-                currentJobId = data.job_id;
+                currentJobId   = data.job_id;
+                currentLocation = loc;
+                saveJob(currentJobId, loc);
 
-                // UI aktualisieren
-                document.getElementById('progressSection').classList.remove('hidden');
-                document.getElementById('resultsSection').classList.add('hidden');
-                document.getElementById('progressLocation').textContent = data.location;
-                document.getElementById('progressBar').style.width = '0%';
-                document.getElementById('progressBar').className = 'bg-blue-600 h-3 rounded-full transition-all duration-500';
-                document.getElementById('statusBadge').textContent = 'Läuft...';
-                document.getElementById('statusBadge').className = 'px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
-
-                btn.textContent = 'Läuft...';
-
-                // Polling starten
-                if (pollInterval) clearInterval(pollInterval);
-                pollInterval = setInterval(pollStatus, 2000);
+                showProgressUI(loc, 'running');
+                startPolling();
 
             } catch (e) {
                 alert('Netzwerkfehler: ' + e.message);
@@ -231,125 +824,235 @@
             }
         }
 
+        function showProgressUI(loc, statusKey) {
+            document.getElementById('progressSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('progressLocation').textContent = loc;
+            setBar(0, statusKey === 'done' ? 'done' : statusKey === 'verifying' ? 'verifying' : '');
+            setBadge('running', 'Läuft…');
+        }
+
+        function setBar(pct, cls) {
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('progressBar').className = 'progress-fill' + (cls ? ' ' + cls : '');
+        }
+
+        function setBadge(type, text) {
+            const el = document.getElementById('statusBadge');
+            el.textContent = text;
+            el.className = 'status-badge s-' + type;
+        }
+
+        // ── Polling ──────────────────────────────────────────────────────
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(pollStatus, 2000);
+        }
+
         async function pollStatus() {
             if (!currentJobId) return;
-
             try {
                 const resp = await fetch(`/api/status/${currentJobId}`);
-                const data = await resp.json();
+                if (!resp.ok) return;
+                const d = await resp.json();
 
-                document.getElementById('progressPct').textContent = data.progress_pct + '%';
-                document.getElementById('progressBar').style.width = data.progress_pct + '%';
-                document.getElementById('statFound').textContent = data.total_found;
-                document.getElementById('statNoWeb').textContent = data.no_website_count;
-                document.getElementById('statHasWeb').textContent = data.has_website_count;
-                document.getElementById('statEmails').textContent = data.email_found_count || 0;
-                document.getElementById('statTerm').textContent = data.current_term || '-';
+                const pct = d.progress_pct || 0;
+                document.getElementById('progressPct').textContent = pct + '%';
+                setBar(pct, d.status === 'verifying' ? 'verifying' : d.status === 'completed' ? 'done' : '');
 
-                // Status-Badge aktualisieren
-                if (data.status === 'verifying') {
-                    const vText = data.verify_total > 0
-                        ? `Verifizierung ${data.verified_count}/${data.verify_total}`
-                        : 'Verifizierung...';
-                    document.getElementById('statusBadge').textContent = vText;
-                    document.getElementById('statusBadge').className = 'px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800';
-                    document.getElementById('progressBar').className = 'bg-purple-600 h-3 rounded-full transition-all duration-500';
+                const startMs = parseInt(localStorage.getItem('jobStartTime') || Date.now());
+                document.getElementById('timeEstimate').textContent = formatTimeRemaining(startMs, pct);
+
+                document.getElementById('statFound').textContent  = d.total_found       || 0;
+                document.getElementById('statNoWeb').textContent  = d.no_website_count  || 0;
+                document.getElementById('statHasWeb').textContent = d.has_website_count || 0;
+                document.getElementById('statEmails').textContent = d.email_found_count || 0;
+                document.getElementById('currentTerm').textContent = d.current_term ? '→ ' + d.current_term : '';
+
+                if (d.status === 'verifying') {
+                    const vt = d.verify_total > 0 ? `${d.verified_count}/${d.verify_total}` : '…';
+                    setBadge('verify', 'Verifizierung ' + vt);
+                    document.getElementById('statVerify').textContent = vt;
                 }
 
-                if (data.status === 'completed') {
+                if (d.status === 'completed') {
                     clearInterval(pollInterval);
-                    document.getElementById('statusBadge').textContent = 'Fertig';
-                    document.getElementById('statusBadge').className = 'px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                    document.getElementById('progressBar').className = 'bg-green-600 h-3 rounded-full transition-all duration-500';
-                    document.getElementById('startBtn').disabled = false;
+                    clearSavedJob();
+                    setBadge('done', '✓ Fertig');
+                    setBar(100, 'done');
+                    document.getElementById('progressPct').textContent  = '100%';
+                    document.getElementById('timeEstimate').textContent = '';
+                    document.getElementById('currentTerm').textContent  = '';
+                    document.getElementById('startBtn').disabled    = false;
                     document.getElementById('startBtn').textContent = 'Neue Suche';
                     loadResults();
-                } else if (data.status === 'error') {
+                } else if (d.status === 'error') {
                     clearInterval(pollInterval);
-                    document.getElementById('statusBadge').textContent = 'Fehler';
-                    document.getElementById('statusBadge').className = 'px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800';
-                    document.getElementById('startBtn').disabled = false;
+                    clearSavedJob();
+                    setBadge('error', 'Fehler');
+                    document.getElementById('startBtn').disabled    = false;
                     document.getElementById('startBtn').textContent = 'Erneut versuchen';
-                    alert('Fehler: ' + data.error_message);
+                    alert('Fehler: ' + d.error_message);
                 }
+
             } catch (e) {
                 console.error('Polling error:', e);
             }
         }
 
+        // ── Ergebnisse laden ─────────────────────────────────────────────
         async function loadResults() {
             const resp = await fetch(`/api/results/${currentJobId}`);
-            const data = await resp.json();
-            allResults = data.businesses;
+            const d    = await resp.json();
+            allResults  = d.businesses;
             currentPage = 0;
 
             document.getElementById('resultsSection').classList.remove('hidden');
-            document.getElementById('resultCount').textContent = data.count;
+            document.getElementById('resultCount').textContent = d.count;
+
+            const noWeb  = allResults.filter(b => b.lead_type === 'Keine Website').length;
+            const hasWeb = allResults.filter(b => b.lead_type === 'Website vorhanden').length;
+            const emails = allResults.filter(b => b.email).length;
+            document.getElementById('summaryNoWeb').textContent  = noWeb;
+            document.getElementById('summaryHasWeb').textContent = hasWeb;
+            document.getElementById('summaryEmails').textContent = emails;
+
             renderPage();
         }
 
         function renderPage() {
             const start = currentPage * PAGE_SIZE;
-            const end = Math.min(start + PAGE_SIZE, allResults.length);
-            const page = allResults.slice(start, end);
-
+            const end   = Math.min(start + PAGE_SIZE, allResults.length);
+            const page  = allResults.slice(start, end);
             const tbody = document.getElementById('resultsBody');
             tbody.innerHTML = '';
 
             for (const b of page) {
-                const rating = b.rating ? `${b.rating} ★` : '-';
+                const hot   = b.lead_type === 'Keine Website';
+                const badge = hot
+                    ? '<span class="badge-hot">● Kein Web</span>'
+                    : '<span class="badge-cold">● Website</span>';
+
+                const gq    = encodeURIComponent((b.name || '') + ' ' + currentLocation);
+                const gLink = `<a href="https://www.google.com/search?q=${gq}" target="_blank" class="google-btn" title="Google Suche">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.34 5 12c0-4.59 3.58-7.36 7.27-7.36 3.19 0 4.64 1.73 4.64 1.73L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.33 0 9.25-3.76 9.25-9.09 0-1.15-.15-1.81-.15-1.81z"/>
+                    </svg>
+                </a>`;
+
+                const nameCell = `<div class="name-cell">
+                    <span class="name-text">${esc(b.name)}</span>${gLink}
+                </div>`;
+
                 const emailCell = b.email
-                    ? `<a href="mailto:${esc(b.email)}" class="text-blue-600 hover:underline">${esc(b.email)}</a>`
-                    : '-';
-                const isHot = b.lead_type === 'Keine Website';
-                const badgeClass = isHot
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-orange-100 text-orange-800';
-                const badgeText = isHot ? 'Keine Website' : 'Website vorhanden';
-                const websiteCell = b.website
-                    ? `<a href="${esc(b.website)}" target="_blank" class="text-blue-600 hover:underline text-xs truncate block max-w-[160px]">${esc(b.website.replace(/^https?:\/\//, ''))}</a>`
-                    : '-';
+                    ? `<a href="mailto:${esc(b.email)}" class="link-blue">${esc(b.email)}</a>`
+                    : `<span class="dim">—</span>`;
+
+                const webCell = b.website
+                    ? `<a href="${esc(b.website)}" target="_blank" class="link-blue"
+                          style="max-width:170px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;"
+                       >${esc(b.website.replace(/^https?:\/\//, ''))}</a>`
+                    : `<span class="dim">—</span>`;
+
+                const rating = b.rating
+                    ? `<span class="td-rating-val">${b.rating} ★</span>`
+                    : `<span class="dim">—</span>`;
+
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50';
                 tr.innerHTML = `
-                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${badgeClass}">${badgeText}</span></td>
-                    <td class="px-4 py-3 font-medium text-gray-900">${esc(b.name)}</td>
-                    <td class="px-4 py-3 text-gray-600">${esc(b.address || '-')}</td>
-                    <td class="px-4 py-3 text-gray-600">${esc(b.phone || '-')}</td>
-                    <td class="px-4 py-3 text-gray-600">${emailCell}</td>
-                    <td class="px-4 py-3 text-gray-600">${websiteCell}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-gray-100 rounded text-xs">${esc(b.category || '-')}</span></td>
-                    <td class="px-4 py-3 text-gray-600">${rating}</td>
-                `;
+                    <td>${badge}</td>
+                    <td>${nameCell}</td>
+                    <td class="td-addr">${esc(b.address || '—')}</td>
+                    <td class="td-phone">${esc(b.phone || '—')}</td>
+                    <td>${emailCell}</td>
+                    <td>${webCell}</td>
+                    <td><span class="badge-cat">${esc(b.category || '—')}</span></td>
+                    <td>${rating}</td>`;
                 tbody.appendChild(tr);
             }
 
-            // Pagination
-            const totalPages = Math.ceil(allResults.length / PAGE_SIZE);
-            document.getElementById('pageInfo').textContent = allResults.length > 0
+            const total = Math.ceil(allResults.length / PAGE_SIZE);
+            document.getElementById('pageInfo').textContent = allResults.length
                 ? `${start + 1}–${end} von ${allResults.length}`
                 : 'Keine Ergebnisse';
             document.getElementById('prevBtn').disabled = currentPage === 0;
-            document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+            document.getElementById('nextBtn').disabled = currentPage >= total - 1;
         }
 
         function prevPage() { if (currentPage > 0) { currentPage--; renderPage(); } }
         function nextPage() { currentPage++; renderPage(); }
 
         function downloadCSV() {
-            if (currentJobId) {
-                window.location.href = `/api/download/${currentJobId}`;
+            if (currentJobId) window.location.href = `/api/download/${currentJobId}`;
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s || '';
+            return d.innerHTML;
+        }
+
+        // ── Init + Resume ────────────────────────────────────────────────
+        async function init() {
+            await loadCategories();
+
+            const savedId  = localStorage.getItem('activeJobId');
+            const savedLoc = localStorage.getItem('activeJobLocation');
+
+            if (!savedId) return;
+
+            try {
+                const resp = await fetch(`/api/status/${savedId}`);
+
+                if (!resp.ok) { clearSavedJob(); return; }
+
+                const d = await resp.json();
+
+                if (d.status === 'completed') {
+                    currentJobId    = savedId;
+                    currentLocation = savedLoc || d.location;
+                    clearSavedJob();
+
+                    document.getElementById('location').value = currentLocation;
+                    document.getElementById('progressSection').classList.remove('hidden');
+                    document.getElementById('progressLocation').textContent = currentLocation;
+                    setBadge('done', '✓ Fertig');
+                    setBar(100, 'done');
+                    document.getElementById('progressPct').textContent  = '100%';
+                    document.getElementById('statFound').textContent    = d.total_found       || 0;
+                    document.getElementById('statNoWeb').textContent    = d.no_website_count  || 0;
+                    document.getElementById('statHasWeb').textContent   = d.has_website_count || 0;
+                    document.getElementById('statEmails').textContent   = d.email_found_count || 0;
+                    document.getElementById('startBtn').textContent     = 'Neue Suche';
+                    loadResults();
+
+                } else if (['running', 'verifying', 'pending'].includes(d.status)) {
+                    currentJobId    = savedId;
+                    currentLocation = savedLoc || d.location;
+
+                    document.getElementById('location').value = currentLocation;
+                    document.getElementById('resumeNotice').style.display = 'block';
+                    document.getElementById('progressSection').classList.remove('hidden');
+                    document.getElementById('progressLocation').textContent = currentLocation;
+                    setBadge('running', 'Läuft…');
+                    setBar(d.progress_pct || 0, '');
+                    document.getElementById('startBtn').disabled    = true;
+                    document.getElementById('startBtn').textContent = 'Läuft…';
+
+                    setTimeout(() => {
+                        document.getElementById('resumeNotice').style.display = 'none';
+                    }, 5000);
+
+                    startPolling();
+                } else {
+                    clearSavedJob();
+                }
+            } catch {
+                clearSavedJob();
             }
         }
 
-        function esc(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        // Init
-        loadCategories();
+        init();
     </script>
 </body>
 </html>
