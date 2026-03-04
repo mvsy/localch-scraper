@@ -1,0 +1,9 @@
+services:
+  scraper:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - SERPAPI_KEY=${SERPAPI_KEY}
+    volumes:
+      - ./data:/app/data

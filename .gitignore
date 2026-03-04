@@ -1,0 +1,41 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Scraper-Output
+data/
+
+# Logs
+*.log
+logs/
+
+# Playwright
+.playwright/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp-Dateien (Windows-Pfad-Bugs aus früheren Sessions)
+workarea*/
+CUsers*/
+Users*/
+%TEMP%*
+nul

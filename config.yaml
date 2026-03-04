@@ -1,0 +1,171 @@
+# === API Keys ===
+# Setze den Key via Umgebungsvariable SERPAPI_KEY oder hier
+api_keys:
+  serpapi: ""
+
+# === Suchgebiet: Zürich ===
+search_area:
+  name: "Zürich"
+  center_lat: 47.3769
+  center_lon: 8.5417
+  lat_min: 47.28
+  lat_max: 47.48
+  lon_min: 8.40
+  lon_max: 8.70
+  lat_step: 0.03      # ~3.3 km
+  lon_step: 0.045      # ~3.3 km bei dieser Breitengrad
+  zoom: "14z"
+
+# === Suchparameter ===
+search:
+  language: "de"
+  max_pages_per_query: 1    # 1 Seite = 20 Ergebnisse pro Suche (spart API-Calls)
+  results_per_page: 20
+
+# === Suchbegriffe (Deutsch für Zürich) ===
+search_terms:
+  # --- Handwerk ---
+  - "Handwerker"
+  - "Elektriker"
+  - "Sanitär"
+  - "Maler"
+  - "Schreiner"
+  - "Zimmermann"
+  - "Dachdecker"
+  - "Bodenleger"
+  - "Gipser"
+  - "Spengler"
+  - "Schlosser"
+  - "Heizungsinstallateur"
+  - "Klempner"
+  - "Maurer"
+  - "Fliesenleger"
+  - "Gartenbau"
+  - "Landschaftsgärtner"
+  - "Reinigungsfirma"
+  - "Umzugsfirma"
+  - "Kaminfeger"
+
+  # --- Gastronomie ---
+  - "Restaurant"
+  - "Café"
+  - "Bar"
+  - "Imbiss"
+  - "Bäckerei"
+  - "Metzgerei"
+  - "Konditorei"
+  - "Pizzeria"
+  - "Kebab"
+  - "Takeaway"
+  - "Catering"
+
+  # --- Gesundheit ---
+  - "Arzt"
+  - "Zahnarzt"
+  - "Hausarzt"
+  - "Tierarzt"
+  - "Physiotherapie"
+  - "Chiropraktiker"
+  - "Heilpraktiker"
+  - "Psychologe"
+  - "Augenarzt"
+  - "Kinderarzt"
+  - "Frauenarzt"
+  - "Apotheke"
+  - "Optiker"
+  - "Hörgeräte"
+
+  # --- Detailhandel ---
+  - "Blumenladen"
+  - "Buchhandlung"
+  - "Elektronikladen"
+  - "Möbelladen"
+  - "Bekleidungsgeschäft"
+  - "Schuhgeschäft"
+  - "Juwelier"
+  - "Spielwarenladen"
+  - "Geschenkladen"
+  - "Papeterie"
+  - "Sportgeschäft"
+  - "Velogeschäft"
+  - "Weinhandlung"
+  - "Lebensmittelladen"
+  - "Biomarkt"
+  - "Kiosk"
+
+  # --- Dienstleistungen ---
+  - "Coiffeur"
+  - "Friseur"
+  - "Kosmetikstudio"
+  - "Nagelstudio"
+  - "Tattoo Studio"
+  - "Schneider"
+  - "Schuhmacher"
+  - "Schlüsseldienst"
+  - "Druckerei"
+  - "Copyshop"
+  - "Fotograf"
+  - "Fahrschule"
+  - "Nachhilfe"
+  - "Übersetzungsbüro"
+  - "Rechtsanwalt"
+  - "Notar"
+  - "Steuerberater"
+  - "Treuhand"
+  - "Versicherungsberater"
+  - "Immobilienmakler"
+
+  # --- Auto & Transport ---
+  - "Autowerkstatt"
+  - "Autogarage"
+  - "Reifenservice"
+  - "Autowaschanlage"
+  - "Fahrradwerkstatt"
+  - "Taxiunternehmen"
+
+  # --- Haus & Wohnen ---
+  - "Schädlingsbekämpfung"
+  - "Gebäudereinigung"
+  - "Fensterreinigung"
+  - "Gartenservice"
+  - "Hauswartung"
+
+  # --- Bildung & Freizeit ---
+  - "Musikschule"
+  - "Tanzschule"
+  - "Yogastudio"
+  - "Fitnessstudio"
+  - "Kampfsport"
+  - "Sprachschule"
+  - "Kindertagesstätte"
+
+# === Filterung ===
+filtering:
+  keep_only_no_website: true
+  treat_social_media_as_no_website: true
+  social_media_domains:
+    - "facebook.com"
+    - "instagram.com"
+    - "twitter.com"
+    - "x.com"
+    - "tiktok.com"
+    - "linkedin.com"
+
+# === Output ===
+output:
+  directory: "data/output"
+  format: "csv"    # "csv", "excel", oder "both"
+  filename_prefix: "zuerich_ohne_website"
+
+# === Rate Limiting ===
+rate_limiting:
+  requests_per_second: 1.0
+  max_retries: 3
+  retry_backoff_base: 2
+  retry_max_wait_seconds: 60
+
+# === Fortschritt ===
+progress:
+  enabled: true
+  directory: "data/progress"
+  checkpoint_every_n_queries: 10
